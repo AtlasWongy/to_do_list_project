@@ -1,26 +1,39 @@
 import express from 'express'
 
-import { getProducts, getProduct, createProduct } from './database.js'
+import { getTasks, getTask, createTask, deleteTask, updateTask } from './database.js'
 
 const app = express()
 
 app.use(express.json())
 
-app.get("/products", async (req, res) => {
-    const products = await getProducts()
-    res.send(products)
+app.get("/tasks", async (req, res) => {
+    const tasks = await getTasks()
+    res.send(tasks)
 })
 
-app.get("/products/:id", async (req, res) => {
+app.get("/tasks/:id", async (req, res) => {
     const id = req.params.id
-    const product = await getProduct(id)
-    res.send(product)
+    const task = await getTask(id)
+    res.send(task)
 })
 
-app.post("/product", async (req, res) => {
-    const {name, description, price} = req.body
-    const product = await createProduct(name, description, price)
-    res.status(201).send(product)
+app.post("/task", async (req, res) => {
+    const {description, deadline, assignee, assignor, completed} = req.body
+    const task = await createTask(description, deadline, assignee, assignor, completed)
+    res.status(201).send(task)
+})
+
+app.delete("/task/:id", async (req, res) => {
+    const id = req.params.id
+    const task = await deleteTask(id)
+    res.status(201).send(task)
+})
+
+app.put("/task/:id", async (req, res) => {
+    const id = req.params.id
+    const {description, deadline, assignee, assignor, completed} = req.body
+    const task = await updateTask(id, description, deadline, assignee, assignor, completed)
+    res.status(201).send(task)
 })
 
 app.use((err, req, res, next) => {

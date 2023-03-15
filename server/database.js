@@ -10,30 +10,52 @@ const pool = mysql.createPool({
     database: process.env.MYSQL_DATABASE
 }).promise()
 
-export async function getProducts() {
-    const [rows] = await pool.query("SELECT * FROM product")
+export async function getTasks() {
+    const [rows] = await pool.query("SELECT * FROM Tasks")
     return rows
 }
 
-export async function getProduct(id) {
+export async function getTask(id) {
     const [rows] = await pool.query(
         `
             SELECT *
-            FROM product
-            WHERE id = ?
+            FROM Tasks
+            WHERE ID = ?
         `, [id]
     )
     return rows[0]
 }
 
-export async function createProduct(name, description, price) {
+export async function createTask(description, deadline, assignee, assignor, completed) {
     const [result] = await pool.query(
         `
-            INSERT INTO product (name, description, price)
-            VALUES (?, ?, ?)
-        `, [name, description, price]
+            INSERT INTO Tasks (description, deadline, assignee, assignor, completed)
+            VALUES (?, ?, ?, ?, ?)
+        `, [description, deadline, assignee, assignor, completed]
     )
     const id = result.insertId
-    return getProduct(id)
+    return getTask(id)
+}
+
+export async function deleteTask(id) {
+    const deletedTask= await getTask(id)
+    await pool.query(
+        `
+            DELETE FROM Tasks
+            WHERE ID = ?
+        `, [id]
+    )
+    return deletedTask
+}
+
+export async function updateTask(id, description, deadline, assignee, assignor, completed) {
+    const task = await pool.query(
+        `
+            UPDATE Tasks
+            SET Description = ?, Deadline = ?, Assignee = ?, Assignor = ?, Completed = ?
+            WHERE Id = ?
+        `, [description, deadline, assignee, assignor, completed, id]
+    )
+    return getTask(id)
 }
 
